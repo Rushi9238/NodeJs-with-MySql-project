@@ -2,10 +2,8 @@ import { asyncHandler } from "../utils/asyncHnadler.js";
 
 
 const resisterUser=asyncHandler(async (req,res)=>{
-    return res.status(200).json({
-        message:"User Registered Successfully",
-        data:null
-    })
+    const {name}=req.body;
+    console.log("body",name);
 })
 
 
