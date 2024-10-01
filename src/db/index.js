@@ -43,12 +43,24 @@ const checkEmailExistance=async(email)=>{
   try {
     const connection= await connectDB();
     const query ='SELECT * FROM users WHERE email= ?'
-    const result=await connection.execute(query,[email])
-    
+    // const result=await connection.execute(query,[email])
+    const [results] = await connection.execute(query, [email]);
+    console.log("result from check email existance function :",results);
+    return results.length > 0;
   } catch (error) {
     console.error("Error checking email existence function :",error)
     return false;
   }
 }
 
-export { connectDB };
+const executeQuery=async(sql,params)=>{
+  try {
+    const connection= await connectDB();
+    return await connection.query(sql,params)
+    
+  } catch (error) {
+    console.error("Error comes when query execte time :",error)
+  }
+}
+
+export { connectDB , checkEmailExistance, executeQuery};
