@@ -1,14 +1,37 @@
 import { checkEmailExistance, executeQuery } from "../db/index.js";
 import { asyncHandler } from "../utils/asyncHnadler.js";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+
+const createPasswordIntoHash = async (password) => {
+  const saltRound = 10;
+  try {
+    const salt = await bcrypt.genSalt(saltRound);
+    const hashPassword = await bcrypt.hash(password, salt);
+    return hashPassword;
+  } catch (error) {
+    console.error("Error comes when create password in hash :", error);
+  }
+};
+
+const checkIsPasswordCorrect=async(password,hashedPassword)=>{
+  try {
+    const isPasswordCorrect = await bcrypt.compare(password, hashedPassword);
+    return isPasswordCorrect;
+    
+  } catch (error) {
+    console.error("Error comes when checking the hashed passwod and password :",error)
+  }
+}
 
 const resisterUser = asyncHandler(async (req, res) => {
   //GET USER DEATILS FROM FRONTEND
-  const { userName, email, password } = req.body;
+  const { userName, email, password, userRole } = req.body;
 
   // CHECK VALIDATION ALL FILEDS ARE REQUIRED
 
-  console.table([userName, email, password]);
-  if (!userName || !email || !password) {
+  console.table([userName, email, password, userRole]);
+  if (!userName || !email || !password || !userRole) {
     return res.status(400).json({
       status: false,
       message: "Please fill in all fields",
@@ -37,11 +60,14 @@ const resisterUser = asyncHandler(async (req, res) => {
     });
   }
 
-  const query = `INSERT INTO users (userName, email, password) VALUES (?, ?, ?)`;
-  const params = [userName, email, password];
+  // convert Password into bycrpt 
+  const hashedPassword= await createPasswordIntoHash(password)
+
+  const query = `INSERT INTO users (userName, email, password, userRole) VALUES (?, ?, ?, ?)`;
+  const params = [userName, email, hashedPassword, userRole];
   try {
     const result = await executeQuery(query, params);
-    console.log("Final result is : ", result);
+    // console.log("Final result is : ", result);
     return res.status(201).json({
       status: true,
       message: "User Resister Successfully!!!",
@@ -50,6 +76,7 @@ const resisterUser = asyncHandler(async (req, res) => {
           id: result[0].insertId,
           userName: userName,
           email: email,
+          userRole,
         },
       },
     });
@@ -123,5 +150,13 @@ const showSingleUserDeatils = asyncHandler(async (req, res) => {
     console.error("Error comes when get single API call, ", error);
   }
 });
+
+const userLogin=asyncHandler(async(req,res)=>{
+    //get deatils user mail and password
+    //check mail and password coming or not
+    //check password and database hashed password are correct or not
+    //create token 
+    // send token and user deatils 
+})
 
 export { resisterUser, showUserList, showSingleUserDeatils };
