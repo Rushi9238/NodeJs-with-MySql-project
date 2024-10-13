@@ -45,7 +45,7 @@ const checkEmailExistance=async(email)=>{
     const query ='SELECT * FROM users WHERE email= ?'
     // const result=await connection.execute(query,[email])
     const [results] = await connection.execute(query, [email]);
-    console.log("result from check email existance function :",results);
+    // console.log("result from check email existance function :",results);
     return results.length > 0;
   } catch (error) {
     console.error("Error checking email existence function :",error)
